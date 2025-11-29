@@ -1,7 +1,9 @@
 package main
 
 import (
+	"html/template"
 	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -15,6 +17,11 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	// Fonctions template personnalisées
+	router.SetFuncMap(template.FuncMap{
+		"join": strings.Join,
+	})
 
 	// Templates HTML
 	router.LoadHTMLGlob("templates/*.tmpl")

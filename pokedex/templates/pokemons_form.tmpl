@@ -1,0 +1,76 @@
+{{ template "layout" . }}
+
+{{ define "title" }}{{ .title }}{{ end }}
+
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+
+{{ if .errors }}
+    <ul style="color:red;">
+    {{ range .errors }}
+        <li>{{ . }}</li>
+    {{ end }}
+    </ul>
+{{ end }}
+
+<form method="POST" action="/pokemons">
+    <div>
+        <label>Nom :</label>
+        <input type="text" name="name" value="{{ .input.Name }}">
+    </div>
+
+    <div>
+        <label>Base XP :</label>
+        <input type="number" name="baseExperience" value="{{ .input.BaseExperience }}">
+    </div>
+
+    <div>
+        <label>Poids :</label>
+        <input type="number" name="weight" value="{{ .input.Weight }}">
+    </div>
+
+    <div>
+        <label>Taille :</label>
+        <input type="number" name="height" value="{{ .input.Height }}">
+    </div>
+
+    <div>
+        <label>Types (séparés par des virgules) :</label>
+        <input type="text" name="types" value="{{ join .input.Types "," }}">
+    </div>
+
+    <fieldset>
+        <legend>Stats</legend>
+        <div>
+            <label>HP :</label>
+            <input type="number" name="stats.hp" value="{{ .input.Stats.HP }}">
+        </div>
+        <div>
+            <label>Attaque :</label>
+            <input type="number" name="stats.attack" value="{{ .input.Stats.Attack }}">
+        </div>
+        <div>
+            <label>Défense :</label>
+            <input type="number" name="stats.defense" value="{{ .input.Stats.Defense }}">
+        </div>
+        <div>
+            <label>Vitesse :</label>
+            <input type="number" name="stats.speed" value="{{ .input.Stats.Speed }}">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Sprites</legend>
+        <div>
+            <label>Sprite avant (URL) :</label>
+            <input type="text" name="sprites.front_default" value="{{ .input.Sprites.FrontDefault }}">
+        </div>
+        <div>
+            <label>Sprite arrière (URL) :</label>
+            <input type="text" name="sprites.back_default" value="{{ .input.Sprites.BackDefault }}">
+        </div>
+    </fieldset>
+
+    <button type="submit">Créer</button>
+</form>
+{{ end }}
