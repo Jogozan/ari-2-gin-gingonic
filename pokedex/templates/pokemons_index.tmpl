@@ -1,0 +1,34 @@
+{{ template "layout" . }}
+
+{{ define "title" }}{{ .title }}{{ end }}
+
+{{ define "content" }}
+<h1>{{ .title }}</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Sprite</th>
+            <th>Nom</th>
+            <th>Types</th>
+            <th>Base XP</th>
+        </tr>
+    </thead>
+    <tbody>
+    {{ range .pokemons }}
+        <tr>
+            <td>{{ .ID }}</td>
+            <td><img src="{{ .Sprites.FrontDefault }}" alt="{{ .Name }}" width="48"></td>
+            <td><a href="/pokemons/{{ .ID }}">{{ .Name }}</a></td>
+            <td>
+                {{ range .Types }}
+                    <span class="type-badge">{{ . }}</span>
+                {{ end }}
+            </td>
+            <td>{{ .BaseExperience }}</td>
+        </tr>
+    {{ end }}
+    </tbody>
+</table>
+{{ end }}
