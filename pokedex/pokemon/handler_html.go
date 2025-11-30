@@ -13,10 +13,50 @@ func RegisterHTMLRoutes(r *gin.Engine) {
 }
 
 func listPokemonsHTML(c *gin.Context) {
+	typeFilter := c.Query("type")
+	minLevelStr := c.Query("minLevel")
+
 	all := GetAll()
+	var filtered []Pokemon
+	for _, p := range all {
+		// même logique que pour l’API
+		if typeFilter != "" {
+			found := false
+			for _, t := range p.Types {
+				if t == typeFilter {
+					found = true
+					break
+				}
+			}
+			if !found {
+				continue
+			}
+		}
+		if minLevelStr != "" {
+			minLevel, err := strconv.Atoi(minLevelStr)
+			if err == nil && p.Stats.HP < minLevel {
+				continue
+			}
+		}
+		filtered = append(filtered, p)
+	}
+
+	// on peut pré-calculer le power pour l’affichage
+	type PokemonView struct {
+		Pokemon
+		Power int
+	}
+	var views []PokemonView
+	for _, p := range filtered {
+		power := p.Stats.HP * p.Stats.Attack
+		views = append(views, PokemonView{Pokemon: p, Power: power})
+	}
+
 	c.HTML(http.StatusOK, "pokemons_index.tmpl", gin.H{
 		"title":    "Pokédex",
-		"pokemons": all,
+		"pokemons": views,
+		"type":     typeFilter,
+		"minLevel": minLevelStr,
 	})
 }
 
