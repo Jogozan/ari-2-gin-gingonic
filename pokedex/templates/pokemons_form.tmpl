@@ -1,0 +1,113 @@
+{{ template "layout" . }}
+
+<h1>{{ .title }}</h1>
+
+<div id="errors" style="color:red;">
+    {{ range .errors }}
+        <div>{{ . }}</div>
+    {{ end }}
+</div>
+
+<form id="pokemonForm">
+    <div>
+        <label>Nom :</label>
+        <input type="text" id="name" value="{{ .input.Name }}">
+    </div>
+
+    <div>
+        <label>Base XP :</label>
+        <input type="number" id="baseExperience" value="{{ .input.BaseExperience }}">
+    </div>
+
+    <div>
+        <label>Poids :</label>
+        <input type="number" id="weight" value="{{ .input.Weight }}">
+    </div>
+
+    <div>
+        <label>Taille :</label>
+        <input type="number" id="height" value="{{ .input.Height }}">
+    </div>
+
+    <div>
+        <label>Types (séparés par des virgules) :</label>
+        <input type="text" id="types" value="{{ join .input.Types "," }}">
+    </div>
+
+    <fieldset>
+        <legend>Stats</legend>
+        <div>
+            <label>HP :</label>
+            <input type="number" id="hp" value="{{ .input.Stats.HP }}">
+        </div>
+        <div>
+            <label>Attaque :</label>
+            <input type="number" id="attack" value="{{ .input.Stats.Attack }}">
+        </div>
+        <div>
+            <label>Défense :</label>
+            <input type="number" id="defense" value="{{ .input.Stats.Defense }}">
+        </div>
+        <div>
+            <label>Vitesse :</label>
+            <input type="number" id="speed" value="{{ .input.Stats.Speed }}">
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Sprites</legend>
+        <div>
+            <label>Sprite avant (URL) :</label>
+            <input type="text" id="front_default" value="{{ .input.Sprites.FrontDefault }}">
+        </div>
+        <div>
+            <label>Sprite arrière (URL) :</label>
+            <input type="text" id="back_default" value="{{ .input.Sprites.BackDefault }}">
+        </div>
+    </fieldset>
+
+    <button type="submit">Créer</button>
+</form>
+
+<pre id="result" style="margin-top:20px; background:#eee; padding:10px;"></pre>
+
+<script>
+document.getElementById("pokemonForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const payload = {
+        name: document.getElementById("name").value,
+        baseExperience: Number(document.getElementById("baseExperience").value),
+        weight: Number(document.getElementById("weight").value),
+        height: Number(document.getElementById("height").value),
+        types: document.getElementById("types").value.split(",").map(t => t.trim()),
+        stats: {
+            hp: Number(document.getElementById("hp").value),
+            attack: Number(document.getElementById("attack").value),
+            defense: Number(document.getElementById("defense").value),
+            speed: Number(document.getElementById("speed").value)
+        },
+        sprites: {
+            front_default: document.getElementById("front_default").value,
+            back_default: document.getElementById("back_default").value
+        }
+    };
+
+    const res = await fetch("/pokemons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    const resultEl = document.getElementById("result");
+
+    if (!res.ok) {
+        const errorData = await res.json();
+        resultEl.textContent = "Erreur : " + JSON.stringify(errorData, null, 2);
+        return;
+    }
+
+    const data = await res.json();
+    resultEl.textContent = JSON.stringify(data, null, 2);
+});
+</script>
