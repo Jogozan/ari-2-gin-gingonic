@@ -1,8 +1,5 @@
 {{ template "layout" . }}
 
-{{ define "title" }}{{ .title }}{{ end }}
-
-{{ define "content" }}
 <h1>{{ .title }}</h1>
 
 {{ if .errors }}
@@ -73,4 +70,3 @@
 
     <button type="submit">Créer</button>
 </form>
-{{ end }}

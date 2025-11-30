@@ -26,10 +26,10 @@ type Pokemon struct {
 // Validation avancée pour la création / édition via API JSON.
 type CreatePokemonInput struct {
 	Name           string   `json:"name" binding:"required,max=50"`
-	Types          []string `json:"types" binding:"required,min=1,max=2,dive,oneof=Fire Water Grass Electric Psychic Normal Fighting Flying Poison Ground Rock Bug Ghost Steel Ice Dragon Dark Fairy"`
+	Types          []string `json:"types" binding:"required"` // plus de dive ici
 	BaseExperience int      `json:"baseExperience" binding:"required,min=1,max=1000"`
 	Weight         int      `json:"weight" binding:"required,min=1,max=10000"`
 	Height         int      `json:"height" binding:"required,min=1,max=100"`
-	Stats          Stats    `json:"stats" binding:"required,dive"`
+	Stats          Stats    `json:"stats" binding:"required"` // plus de dive
 	Sprites        Sprites  `json:"sprites" binding:"required"`
 }
