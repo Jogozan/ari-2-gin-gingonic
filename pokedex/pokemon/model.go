@@ -13,11 +13,8 @@ type Sprites struct {
 }
 
 type Pokemon struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	// Level is an in-memory convenience field used by the TP to demonstrate "level-up".
-	// It's not present in the original JSON but will be initialized to 1 when loading.
-	Level          int      `json:"level"`
+	ID             int      `json:"id"`
+	Name           string   `json:"name"`
 	BaseExperience int      `json:"baseExperience"`
 	Weight         int      `json:"weight"`
 	Height         int      `json:"height"`

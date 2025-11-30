@@ -31,13 +31,6 @@ func LoadFromFile(path string) error {
 		return err
 	}
 
-	// Ensure every Pokemon has a default Level value so level-up can be demonstrated
-	for i := range list {
-		if list[i].Level == 0 {
-			list[i].Level = 1
-		}
-	}
-
 	pokemons = list
 	loaded = true
 	return nil
@@ -76,7 +69,6 @@ func Create(input CreatePokemonInput) Pokemon {
 	p := Pokemon{
 		ID:             newID,
 		Name:           input.Name,
-		Level:          1,
 		BaseExperience: input.BaseExperience,
 		Weight:         input.Weight,
 		Height:         input.Height,
@@ -102,20 +94,23 @@ func Delete(id int) error {
 	return errors.New("not found")
 }
 
-// LevelUp increases the Pokemon's level and modifies BaseExperience as a simple side-effect.
-func LevelUp(id int, levels int) (*Pokemon, error) {
+var ErrMaxLevel = errors.New("max level reached")
+
+func LevelUp(id int) (Pokemon, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	for i := range pokemons {
-		if pokemons[i].ID == id {
-			pokemons[i].Level += levels
-			// For demo purposes: each level gives +10 base experience
-			pokemons[i].BaseExperience += 10 * levels
-			copy := pokemons[i]
-			return &copy, nil
+	for i, p := range pokemons {
+		// exemple de règle: niveau max 100, +1 niveau = +10 HP
+		if p.ID == id {
+			if p.Stats.HP >= 400 { // règle arbitraire de “max”
+				return Pokemon{}, ErrMaxLevel
+			}
+			p.Stats.HP += 10
+			p.BaseExperience += 5
+			pokemons[i] = p
+			return p, nil
 		}
 	}
-
-	return nil, errors.New("not found")
+	return Pokemon{}, errors.New("not found")
 }
