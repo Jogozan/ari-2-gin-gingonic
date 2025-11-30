@@ -31,6 +31,13 @@ func LoadFromFile(path string) error {
 		return err
 	}
 
+	// Ensure every Pokemon has a default Level value so level-up can be demonstrated
+	for i := range list {
+		if list[i].Level == 0 {
+			list[i].Level = 1
+		}
+	}
+
 	pokemons = list
 	loaded = true
 	return nil
@@ -69,6 +76,7 @@ func Create(input CreatePokemonInput) Pokemon {
 	p := Pokemon{
 		ID:             newID,
 		Name:           input.Name,
+		Level:          1,
 		BaseExperience: input.BaseExperience,
 		Weight:         input.Weight,
 		Height:         input.Height,
@@ -92,4 +100,22 @@ func Delete(id int) error {
 		}
 	}
 	return errors.New("not found")
+}
+
+// LevelUp increases the Pokemon's level and modifies BaseExperience as a simple side-effect.
+func LevelUp(id int, levels int) (*Pokemon, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	for i := range pokemons {
+		if pokemons[i].ID == id {
+			pokemons[i].Level += levels
+			// For demo purposes: each level gives +10 base experience
+			pokemons[i].BaseExperience += 10 * levels
+			copy := pokemons[i]
+			return &copy, nil
+		}
+	}
+
+	return nil, errors.New("not found")
 }

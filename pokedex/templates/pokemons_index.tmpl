@@ -2,6 +2,15 @@
 
 <h1>{{ .title }}</h1>
 
+<form method="GET" action="/pokemons" style="margin-bottom:15px;">
+    <label>Type:
+        <input type="text" name="type" value="{{ .type }}">
+    </label>
+    <label style="margin-left:10px;">Min HP:
+        <input type="number" name="minLevel" value="{{ .minLevel }}">
+    </label>
+    <button type="submit">Filtrer</button>
+</form>
 <a href="/pokemons/new">Nouveau Pokémon</a>
 
 <table>
@@ -12,6 +21,7 @@
             <th>Nom</th>
             <th>Types</th>
             <th>Base XP</th>
+            <th>Power</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +36,7 @@
                 {{ end }}
             </td>
             <td>{{ .BaseExperience }}</td>
+            <td>{{ .Power }}</td>
         </tr>
     {{ end }}
     </tbody>

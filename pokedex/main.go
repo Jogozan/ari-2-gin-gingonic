@@ -3,6 +3,7 @@ package main
 import (
 	"html/template"
 	"log"
+	"time"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,11 @@ func main() {
 
 	router := gin.Default()
 
+	// Global middlewares (applied to all routes):
+	// - EnrichedLogger: copies X-Trainer header into context and logs it
+	// - FatigueMiddleware: if a request includes header X-Server-Fatigue=true we add delay
+	router.Use(pokemon.EnrichedLogger())
+	router.Use(pokemon.FatigueMiddleware(500 * time.Millisecond))
 	// Fonctions template personnalisées
 	router.SetFuncMap(template.FuncMap{
 		"join": strings.Join,
