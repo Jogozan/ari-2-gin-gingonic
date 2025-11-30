@@ -93,3 +93,24 @@ func Delete(id int) error {
 	}
 	return errors.New("not found")
 }
+
+var ErrMaxLevel = errors.New("max level reached")
+
+func LevelUp(id int) (Pokemon, error) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	for i, p := range pokemons {
+		// exemple de règle: niveau max 100, +1 niveau = +10 HP
+		if p.ID == id {
+			if p.Stats.HP >= 400 { // règle arbitraire de “max”
+				return Pokemon{}, ErrMaxLevel
+			}
+			p.Stats.HP += 10
+			p.BaseExperience += 5
+			pokemons[i] = p
+			return p, nil
+		}
+	}
+	return Pokemon{}, errors.New("not found")
+}
