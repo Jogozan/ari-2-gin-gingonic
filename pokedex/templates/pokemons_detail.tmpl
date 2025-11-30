@@ -32,9 +32,9 @@
                     <tr><th>Taille</th><td>{{ .pokemon.Height }}</td></tr>
                     <tr><th>Types</th>
                         <td>
-                            {{ range .pokemon.Types }}
-                                <span class="type-badge" style="background: #666;">{{ . }}</span>
-                            {{ end }}
+                                        {{ range .pokemon.Types }}
+                                            <span class="type-badge" style="background: {{ index $.type_colors . }};">{{ . }}</span>
+                                        {{ end }}
                         </td>
                     </tr>
                 </table>
@@ -51,7 +51,20 @@
             </div>
         </div>
 
-        <p style="margin-top:20px;"><a href="/pokemons">← Retour au Pokédex</a></p>
+        <div style="margin-top:20px;display:flex;gap:8px;align-items:center;">
+            <form method="POST" action="/pokemons/{{ .pokemon.ID }}/level-up">
+                <input type="hidden" name="redirect" value="{{ $.current_url }}">
+                <input type="hidden" name="levels" value="1">
+                <button type="submit">Monter d'un niveau</button>
+            </form>
+
+            <form method="POST" action="/pokemons/{{ .pokemon.ID }}/release" onsubmit="return confirm('Relâcher {{ .pokemon.Name }} ?');">
+                <input type="hidden" name="redirect" value="{{ $.current_url }}">
+                <button type="submit">Relâcher</button>
+            </form>
+
+            <div style="margin-left:auto;"><a href="/pokemons">← Retour au Pokédex</a></div>
+        </div>
     </div>
 </body>
 </html>

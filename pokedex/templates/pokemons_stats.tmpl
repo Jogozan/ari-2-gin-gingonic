@@ -1,0 +1,21 @@
+{{ template "layout_head" . }}
+<h1>{{ .title }}</h1>
+
+<p>Voici un petit tableau donnant le nombre de Pokémon par type.</p>
+
+<table>
+    <thead>
+        <tr><th>Type</th><th>Count</th></tr>
+    </thead>
+    <tbody>
+    {{ range $type, $count := .type_counts }}
+        <tr>
+            <td><span class="type-badge" style="background: {{ index $.type_colors $type }}">{{ $type }}</span></td>
+            <td>{{ $count }}</td>
+        </tr>
+    {{ end }}
+    </tbody>
+</table>
+
+<p style="margin-top:12px;">Retourner au <a href="/pokemons">Pokédex</a></p>
+{{ template "layout_tail" . }}

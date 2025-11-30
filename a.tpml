@@ -1,4 +1,8 @@
-{{ template "layout_head" . }}
+{{ define "title" }}{{ .title }}{{ end }}
+{{ template "layout" . }}
+
+
+{{ define "content" }}
 <h1>{{ .title }}</h1>
 
 {{ if .message }}
@@ -24,9 +28,7 @@
             <th>Sprite</th>
             <th>Nom</th>
             <th>Types</th>
-            <th>Level</th>
-            <th>Actions</th>
-            <th>Power</th>
+            <th>Base XP</th>
         </tr>
     </thead>
     <tbody>
@@ -43,18 +45,16 @@
             <td>{{ .Level }}</td>
             <td>
                 <form method="POST" action="/pokemons/{{ .ID }}/level-up" style="display:inline;">
-                    <input type="hidden" name="redirect" value="{{ $.current_url }}">
                     <input type="hidden" name="levels" value="1">
                     <button type="submit">Level up</button>
                 </form>
                 <form method="POST" action="/pokemons/{{ .ID }}/release" style="display:inline;margin-left:8px;" onsubmit="return confirm('Confirmer: relâcher {{ .Name }} ?');">
-                    <input type="hidden" name="redirect" value="{{ $.current_url }}">
                     <button type="submit">Relâcher</button>
                 </form>
             </td>
-            <td>{{ index $.power_map .ID }}</td>
+            <td>{{ .BaseExperience }}</td>
         </tr>
     {{ end }}
     </tbody>
 </table>
-{{ template "layout_tail" . }}
+{{ end }}
