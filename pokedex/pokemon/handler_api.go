@@ -1,7 +1,6 @@
 package pokemon
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"time"
