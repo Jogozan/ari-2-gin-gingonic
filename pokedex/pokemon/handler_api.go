@@ -21,7 +21,7 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 
 	// POST /api/v1/admin/pokemons/:id/level-up
 	// Protect this route with a small rate limiter and optional server fatigue
-	admin.POST("/pokemons/:id/level-up", RateLimitMiddleware(5, 10*time.Minute), levelUpPokemon)
+	admin.POST("/pokemons/:id/level-up", RateLimitMiddleware(5, 10*time.Second), levelUpPokemon)
 }
 
 func getPokemons(c *gin.Context) {

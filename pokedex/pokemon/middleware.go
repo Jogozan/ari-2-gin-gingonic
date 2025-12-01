@@ -49,8 +49,9 @@ func SimpleAuth(adminSecret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Check header
 		token := c.GetHeader("X-Admin-Token")
+
+		// Optionnal : try cookie
 		if token == "" {
-			// try cookie (not required for the TP example but shown here)
 			if cookie, err := c.Cookie("admin_token"); err == nil {
 				token = cookie
 			}
