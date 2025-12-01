@@ -1,7 +1,6 @@
 package pokemon
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -62,7 +61,6 @@ func getPokemons(c *gin.Context) {
 		resp = append(resp, toResponse(p))
 	}
 
-	
 	respondOK(c, all)
 }
 
@@ -191,6 +189,8 @@ func levelUpPokemon(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": msg, "data": p})
+}
+
 // Standard response helpers
 
 type APIResponse struct {

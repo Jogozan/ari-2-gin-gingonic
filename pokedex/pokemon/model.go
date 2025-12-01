@@ -29,7 +29,7 @@ type Pokemon struct {
 // Validation avancée pour la création / édition via API JSON.
 type CreatePokemonInput struct {
 	Name           string   `json:"name" binding:"required,max=50"`
-	Types          []string `json:"types" binding:"required"`
+	Types          []string `json:"types" binding:"required,min=1,max=2"`
 	BaseExperience int      `json:"baseExperience" binding:"required,min=1,max=1000"`
 	Weight         int      `json:"weight" binding:"required,min=1,max=10000"`
 	Height         int      `json:"height" binding:"required,min=1,max=100"`
