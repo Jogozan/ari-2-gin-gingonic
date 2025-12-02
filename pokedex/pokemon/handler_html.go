@@ -15,18 +15,10 @@ func RegisterHTMLRoutes(r *gin.Engine) {
 	r.GET("/pokemons", listPokemonsHTML)
 	r.GET("/pokemons/:id", pokemonDetailHTML)
 	r.POST("/pokemons/:id/level-up", pokemonLevelUpHTML)
-	// A small HTML-only "release" action — implemented as POST for form friendliness
 	r.POST("/pokemons/:id/release", pokemonReleaseHTML)
 	r.GET("/pokemons/stats", pokemonsStatsHTML)
 }
 
-//	func listPokemonsHTML(c *gin.Context) {
-//		all := GetAll()
-//		c.HTML(http.StatusOK, "pokemons_index.tmpl", gin.H{
-//			"title":    "Pokédex",
-//			"pokemons": all,
-//		})
-//	}
 func listPokemonsHTML(c *gin.Context) {
 	all := GetAll()
 	// Support simple sorting by level or power (default keeps original order)
