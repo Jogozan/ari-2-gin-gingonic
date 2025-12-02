@@ -1,5 +1,7 @@
 package pokemon
 
+// A fournir entierement
+
 import (
 	"net/http"
 	"strconv"
@@ -59,51 +61,49 @@ func getPokemons(c *gin.Context) {
 	for _, p := range filtered {
 		resp = append(resp, toResponse(p))
 	}
-
-	c.JSON(http.StatusOK, gin.H{"data": resp})
+	RespondOK(c, resp)
 }
 
 func getPokemonByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		RespondError(c, http.StatusBadRequest, []string{"ID invalide."})
 		return
 	}
 
 	p, err := GetByID(id)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Pokemon non trouvé"})
+		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"data": toResponse(*p)})
+	RespondOK(c, toResponse(*p))
 }
 
 func createPokemon(c *gin.Context) {
 	var input CreatePokemonInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Données invalides"})
+		RespondError(c, http.StatusBadRequest, []string{"Données invalides"})
 		return
 	}
 
 	p := Create(input)
-	c.JSON(http.StatusCreated, gin.H{"data": p})
+	RespondCreated(c, p)
 }
 
 func deletePokemon(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		RespondError(c, http.StatusBadRequest, []string{"ID invalide"})
 		return
 	}
 
 	if err := Delete(id); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Pokemon non trouvé"})
+		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Pokemon supprimé"})
+	RespondOK(c, "Pokemon supprimé")
 }
 
 // levelUpPokemon allows an authenticated admin to "level up" a Pokemon.
@@ -113,7 +113,7 @@ func levelUpPokemon(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		RespondError(c, http.StatusBadRequest, []string{"ID invalide"})
 		return
 	}
 
@@ -132,7 +132,7 @@ func levelUpPokemon(c *gin.Context) {
 	// Try to perform level-up
 	p, err := LevelUp(id, addLevels)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Pokemon non trouvé"})
+		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
 
@@ -150,6 +150,5 @@ func levelUpPokemon(c *gin.Context) {
 	if trainer != "" {
 		msg = "Pokemon level-up effectué par " + trainer
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": msg, "data": p})
+	RespondOK(c, gin.H{"message": msg, "pokemon": p})
 }
