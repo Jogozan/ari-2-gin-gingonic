@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 
 	"pokedex/pokemon"
 )
@@ -13,6 +15,10 @@ func main() {
 	// Charger les données depuis pokemons.json
 	if err := pokemon.LoadFromFile("pokemons.json"); err != nil {
 		log.Fatalf("Impossible de charger pokemons.json: %v", err)
+	}
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		pokemon.RegisterCustomValidations(v)
 	}
 
 	router := gin.Default()
