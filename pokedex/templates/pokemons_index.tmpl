@@ -1,8 +1,7 @@
-{{ template "layout" . }}
+{{ template "layout_head" . }}
 
-{{ define "title" }}{{ .title }}{{ end }}
 
-{{ define "content" }}
+  
 <h1>{{ .title }}</h1>
 
 <form method="GET" action="/pokemons" style="margin-bottom:15px;">
@@ -43,4 +42,5 @@
     {{ end }}
     </tbody>
 </table>
-{{ end }}
+
+{{ template "layout_tail" . }}

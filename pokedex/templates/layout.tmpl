@@ -1,4 +1,4 @@
-{{ define "layout" }}
+{{ define "layout_head" }}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -24,7 +24,10 @@
     </nav>
     
     <main class="card">
-        {{ block "content" . }}{{ end }}
+        {{/* content will be injected by per-page templates */}}
+        {{ end }}
+
+{{ define "layout_tail" }}
     </main>
 </body>
 </html>

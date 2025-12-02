@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +30,11 @@ func main() {
 	// - FatigueMiddleware: if a request includes header X-Server-Fatigue=true we add delay
 	router.Use(pokemon.EnrichedLogger())
 	router.Use(pokemon.FatigueMiddleware(500 * time.Millisecond))
+
+	// Fonctions template personnalisées
+	router.SetFuncMap(template.FuncMap{
+		"join": strings.Join,
+	})
 
 	// Templates HTML
 	router.LoadHTMLGlob("templates/*.tmpl")
