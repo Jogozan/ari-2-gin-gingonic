@@ -38,6 +38,7 @@
         <label>Types (séparés par des virgules) :</label>
         <input type="text" id="types" value="{{ join .input.Types "," }}">
         <div class="field-error" data-field="Types" style="color:red;"></div>
+        <div class="field-error" data-field="Types[0]" style="color:red;"></div>
     </div>
 
     <fieldset>
@@ -84,9 +85,24 @@
 <pre id="result" style="margin-top:20px; background:#eee; padding:10px;"></pre>
 
 <script>
+function clearFieldErrors() {
+    document.querySelectorAll(".field-error").forEach(el => {
+        el.textContent = "";
+    });
+}
+
+function showFieldError(field, message) {
+    const el = document.querySelector(`.field-error[data-field="${field}"]`);
+    if (el) {
+        el.textContent = message;
+    }
+}
 
 document.getElementById("pokemonForm").addEventListener("submit", async function (e) {
     e.preventDefault();
+
+    clearFieldErrors();
+    document.getElementById("result").textContent = "";
 
     const payload = {
         name: document.getElementById("name").value,
@@ -114,16 +130,27 @@ document.getElementById("pokemonForm").addEventListener("submit", async function
         });
 
         if (res.ok && res.status === 201) {
-            const data = await res.json(); 
-            // Récupère les données du Pokémon créé
-            document.getElementById("result").textContent = `Pokémon créé avec succès.`;
-            
-            // Vider le formulaire
+            await res.json(); // si tu renvoies un JSON pour le succès
+            document.getElementById("result").textContent = "Pokémon créé avec succès.";
             document.getElementById("pokemonForm").reset();
-            document.getElementById("errors").innerHTML = "";  // Masquer les erreurs précédentes
         } else if (res.status === 400 || res.status === 422) {
             const errorData = await res.json();
-            document.getElementById("result").textContent = "Erreur de validation : " + errorData.message || "Données invalides";
+            console.log("Données d'erreur:", errorData);
+            console.log("--------");
+            // errorData.error est un tableau de messages
+            const errors = errorData.errors || [];
+            console.log("Messages d'erreur:", errors);
+
+            // errors est un objet : { Name: ["..."], BaseExperience: ["..."], ... }
+            Object.keys(errors).forEach(field => {
+                const messages = errors[field]; // tableau de messages pour ce champ
+                if (!messages || messages.length === 0) return;
+
+                // On prend le premier message (ou messages.join(", ") si tu veux tout afficher)
+                showFieldError(field, messages[0]);
+            });
+
+            document.getElementById("result").textContent = "Veuillez corriger les erreurs ci‑dessus.";
         } else {
             throw new Error(`Erreur ${res.status}: ${res.statusText}`);
         }
@@ -132,7 +159,6 @@ document.getElementById("pokemonForm").addEventListener("submit", async function
         document.getElementById("result").textContent = "Erreur lors de la création du Pokémon.";
     }
 });
-
 </script>
 
 {{ template "layout_tail" . }}
