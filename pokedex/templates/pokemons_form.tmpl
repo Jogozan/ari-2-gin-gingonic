@@ -106,12 +106,33 @@ document.getElementById("pokemonForm").addEventListener("submit", async function
         }
     };
 
-    const res = await fetch("/pokemons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await fetch("/pokemons", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok && res.status === 201) {
+            const data = await res.json(); 
+            // Récupère les données du Pokémon créé
+            document.getElementById("result").textContent = `Pokémon créé avec succès.`;
+            
+            // Vider le formulaire
+            document.getElementById("pokemonForm").reset();
+            document.getElementById("errors").innerHTML = "";  // Masquer les erreurs précédentes
+        } else if (res.status === 400 || res.status === 422) {
+            const errorData = await res.json();
+            document.getElementById("result").textContent = "Erreur de validation : " + errorData.message || "Données invalides";
+        } else {
+            throw new Error(`Erreur ${res.status}: ${res.statusText}`);
+        }
+    } catch (error) {
+        console.error("Erreur:", error);
+        document.getElementById("result").textContent = "Erreur lors de la création du Pokémon.";
+    }
 });
+
 </script>
 
 {{ template "layout_tail" . }}
