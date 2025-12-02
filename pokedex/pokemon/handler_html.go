@@ -97,34 +97,50 @@ func newPokemonFormHTML(c *gin.Context) {
 func createPokemonHTML(c *gin.Context) {
 	var input CreatePokemonInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		var messages []string
+		// Map[string][]string : nom du champ -> liste de messages
+		fieldErrors := map[string][]string{}
+
 		if verrs, ok := err.(validator.ValidationErrors); ok {
 			for _, fe := range verrs {
+				var msg string
 				switch fe.Field() {
 				case "Name":
-					messages = append(messages, "Le nom est obligatoire et max 50 caractères.")
+					msg = "Le nom est obligatoire et max 50 caractères."
 				case "Types":
-					messages = append(messages, "Types invalides (ex : Fire, Water, Grass).")
+					msg = "Types invalides (ex : Fire, Water, Grass)."
+				case "Types[0]":
+					msg = "Au moins un type est requis."
 				case "BaseExperience":
-					messages = append(messages, "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000.")
+					msg = "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000."
 				case "Weight":
-					messages = append(messages, "Le poids est obligatoire et doit être compris entre 1 et 10000.")
+					msg = "Le poids est obligatoire et doit être compris entre 1 et 10000."
 				case "Height":
-					messages = append(messages, "La taille est obligatoire et doit être comprise entre 1 et 100.")
+					msg = "La taille est obligatoire et doit être comprise entre 1 et 100."
 				case "Stats":
-					messages = append(messages, "Les statistiques sont obligatoires et doivent être valides.")
+					msg = "Les statistiques sont obligatoires et doivent être valides."
 				case "Sprites":
-					messages = append(messages, "Les sprites sont obligatoires et doivent être valides.")
+					msg = "Les sprites sont obligatoires et doivent être valides."
 				default:
-					messages = append(messages, fe.Field()+" invalide.")
+					msg = fe.Field() + " invalide."
 				}
+
+				field := fe.Field() // ex: Name, Types, BaseExperience...
+				fieldErrors[field] = append(fieldErrors[field], msg)
 			}
 		}
-		RespondError(c, 400, messages)
+
+		// Si tu veux garder une fonction utilitaire :
+		// RespondError(c, http.StatusBadRequest, fieldErrors)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"errors": fieldErrors,
+		})
 		return
 	}
 
 	p := Create(input)
-	RespondCreated(c, p)
-
+	// Réponse succès JSON
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Pokémon créé",
+		"pokemon": p,
+	})
 }
