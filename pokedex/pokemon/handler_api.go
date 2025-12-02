@@ -23,7 +23,14 @@ func levelUpPokemon(c *gin.Context) {
 		return
 	}
 
-	p, err := LevelUp(id)
+	addLevels := 1
+	if lvlStr := c.Query("levels"); lvlStr != "" {
+		if lv, err := strconv.Atoi(lvlStr); err == nil && lv > 0 {
+			addLevels = lv
+		}
+	}
+
+	p, err := LevelUp(id, addLevels)
 	if err != nil {
 		if errors.Is(err, ErrMaxLevel) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Niveau maximum atteint"})

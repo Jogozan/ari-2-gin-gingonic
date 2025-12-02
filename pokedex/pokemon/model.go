@@ -15,6 +15,7 @@ type Sprites struct {
 type Pokemon struct {
 	ID             int      `json:"id"`
 	Name           string   `json:"name"`
+	Level          int      `json:"level"`
 	BaseExperience int      `json:"baseExperience"`
 	Weight         int      `json:"weight"`
 	Height         int      `json:"height"`
