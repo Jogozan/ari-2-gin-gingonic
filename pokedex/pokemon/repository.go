@@ -3,7 +3,7 @@ package pokemon
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"os"
 	"sync"
 )
 
@@ -21,7 +21,7 @@ func LoadFromFile(path string) error {
 		return nil
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -102,20 +102,27 @@ func Delete(id int) error {
 	return errors.New("not found")
 }
 
-// LevelUp increases the Pokemon's level and modifies BaseExperience as a simple side-effect.
-func LevelUp(id int, levels int) (*Pokemon, error) {
+var ErrMaxLevel = errors.New("max level reached")
+
+func LevelUp(id int, levels int) (Pokemon, error) {
 	mu.Lock()
 	defer mu.Unlock()
 
 	for i := range pokemons {
 		if pokemons[i].ID == id {
+			if pokemons[i].Level >= 100 {
+				return Pokemon{}, ErrMaxLevel
+			}
 			pokemons[i].Level += levels
-			// For demo purposes: each level gives +10 base experience
 			pokemons[i].BaseExperience += 10 * levels
+			pokemons[i].Stats.HP += 3 * levels
+			pokemons[i].Stats.Speed += 2 * levels
+			pokemons[i].Stats.Attack += 1 * levels
+			pokemons[i].Stats.Defense += 2 * levels
 			copy := pokemons[i]
-			return &copy, nil
+			return copy, nil
 		}
 	}
 
-	return nil, errors.New("not found")
+	return Pokemon{}, errors.New("not found")
 }
