@@ -3,7 +3,7 @@ package pokemon
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"os"
 	"sync"
 )
 
@@ -21,7 +21,7 @@ func LoadFromFile(path string) error {
 		return nil
 	}
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
