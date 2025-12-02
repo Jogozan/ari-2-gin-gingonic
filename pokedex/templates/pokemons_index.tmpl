@@ -1,8 +1,5 @@
 {{ template "layout" . }}
 
-{{ define "title" }}{{ .title }}{{ end }}
-
-{{ define "content" }}
 <h1>{{ .title }}</h1>
 
 <form method="GET" action="/pokemons" style="margin-bottom:15px;">
@@ -14,6 +11,7 @@
     </label>
     <button type="submit">Filtrer</button>
 </form>
+<a href="/pokemons/new">Nouveau Pokémon</a>
 
 <table>
     <thead>
@@ -43,4 +41,4 @@
     {{ end }}
     </tbody>
 </table>
-{{ end }}
+
