@@ -9,6 +9,7 @@ import (
 
 func RegisterHTMLRoutes(r *gin.Engine) {
 	r.GET("/pokemons", listPokemonsHTML)
+	r.GET("/pokemons/new", newPokemonFormHTML)
 	r.GET("/pokemons/:id", pokemonDetailHTML)
 }
 
@@ -78,5 +79,15 @@ func pokemonDetailHTML(c *gin.Context) {
 		"title":    p.Name,
 		"pokemon":  p,
 		"pokemons": GetAll(), // pour navigation si besoin
+	})
+}
+
+// Formulaire HTML
+func newPokemonFormHTML(c *gin.Context) {
+	// TODO
+	c.HTML(http.StatusOK, "pokemons_form.tmpl", gin.H{
+		"title":  "Nouveau Pokémon",
+		"errors": []string{},
+		"input":  CreatePokemonInput{},
 	})
 }
