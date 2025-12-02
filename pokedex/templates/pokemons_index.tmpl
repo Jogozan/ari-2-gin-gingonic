@@ -1,9 +1,6 @@
-{{ template "layout" . }}
-
-{{ define "title" }}{{ .title }}{{ end }}
-
-{{ define "content" }}
+{{ template "layout_head" . }}
 <h1>{{ .title }}</h1>
+
 
 <table>
     <thead>
@@ -31,4 +28,4 @@
     {{ end }}
     </tbody>
 </table>
-{{ end }}
+{{ template "layout_tail" . }}
