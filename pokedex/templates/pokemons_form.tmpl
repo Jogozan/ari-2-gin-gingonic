@@ -10,31 +10,31 @@
 </div>
 
 <form id="pokemonForm">
-    <div>
+    <div style="margin-bottom:10px;">
         <label>Nom :</label>
         <input type="text" id="name" value="{{ .input.Name }}">
         <div class="field-error" data-field="Name" style="color:red;"></div>
     </div>
 
-    <div>
+    <div style="margin-bottom:10px;">
         <label>Base XP :</label>
         <input type="number" id="baseExperience" value="{{ .input.BaseExperience }}">
         <div class="field-error" data-field="BaseExperience" style="color:red;"></div>
     </div>
 
-    <div>
+    <div style="margin-bottom:10px;">
         <label>Poids :</label>
         <input type="number" id="weight" value="{{ .input.Weight }}">
         <div class="field-error" data-field="Weight" style="color:red;"></div>
     </div>
 
-    <div>
+    <div style="margin-bottom:10px;">
         <label>Taille :</label>
         <input type="number" id="height" value="{{ .input.Height }}">
         <div class="field-error" data-field="Height" style="color:red;"></div>
     </div>
 
-    <div>
+    <div style="margin-bottom:10px;">
         <label>Types (séparés par des virgules) :</label>
         <input type="text" id="types" value="{{ join .input.Types "," }}">
         <div class="field-error" data-field="Types" style="color:red;"></div>
@@ -43,22 +43,22 @@
 
     <fieldset>
         <legend>Stats</legend>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>HP :</label>
             <input type="number" id="hp" value="{{ .input.Stats.HP }}">
             <div class="field-error" data-field="Stats.HP" style="color:red;"></div>
         </div>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>Attaque :</label>
             <input type="number" id="attack" value="{{ .input.Stats.Attack }}">
             <div class="field-error" data-field="Stats.Attack" style="color:red;"></div>
         </div>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>Défense :</label>
             <input type="number" id="defense" value="{{ .input.Stats.Defense }}">
             <div class="field-error" data-field="Stats.Defense" style="color:red;"></div>
         </div>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>Vitesse :</label>
             <input type="number" id="speed" value="{{ .input.Stats.Speed }}">
             <div class="field-error" data-field="Stats.Speed" style="color:red;"></div>
@@ -67,12 +67,12 @@
 
     <fieldset>
         <legend>Sprites</legend>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>Sprite avant (URL) :</label>
             <input type="text" id="front_default" value="{{ .input.Sprites.FrontDefault }}">
             <div class="field-error" data-field="Sprites.FrontDefault" style="color:red;"></div>
         </div>
-        <div>
+        <div style="margin-bottom:10px;">
             <label>Sprite arrière (URL) :</label>
             <input type="text" id="back_default" value="{{ .input.Sprites.BackDefault }}">
             <div class="field-error" data-field="Sprites.BackDefault" style="color:red;"></div>
