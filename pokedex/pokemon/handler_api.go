@@ -3,6 +3,7 @@ package pokemon
 // A fournir entierement
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,6 +20,7 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 	rg.GET("/pokemons/:id", getPokemonByID)
 	rg.POST("/pokemons", createPokemon)
 	rg.DELETE("/pokemons/:id", deletePokemon)
+	rg.POST("/pokemons/:id/level-up", levelUpPokemon)
 
 	// Admin subgroup — demonstrates group middleware (simple auth + optional rate limit)
 	admin := rg.Group("/admin")
@@ -28,6 +30,33 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 	// POST /api/v1/admin/pokemons/:id/level-up
 	// Protect this route with a small rate limiter and optional server fatigue
 	admin.POST("/pokemons/:id/level-up", RateLimitMiddleware(5, 10*time.Second), levelUpPokemon)
+}
+
+func levelUpPokemon(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
+		return
+	}
+
+	addLevels := 1
+	if lvlStr := c.Query("levels"); lvlStr != "" {
+		if lv, err := strconv.Atoi(lvlStr); err == nil && lv > 0 {
+			addLevels = lv
+		}
+	}
+
+	p, err := LevelUp(id, addLevels)
+	if err != nil {
+		if errors.Is(err, ErrMaxLevel) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Niveau maximum atteint"})
+			return
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": "Pokemon non trouvé"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": toResponse(p)})
 }
 
 // getPokemons handles GET /pokemons for the API.

@@ -1,7 +1,4 @@
 {{ template "layout_head" . }}
-
-
-  
 <h1>{{ .title }}</h1>
 
 <form method="GET" action="/pokemons" style="margin-bottom:15px;">
@@ -23,7 +20,7 @@
             <th>Sprite</th>
             <th>Nom</th>
             <th>Types</th>
-            <th>Base XP</th>
+            <th>Level</th>
             <th>Power</th>
         </tr>
     </thead>
@@ -38,11 +35,10 @@
                     <span class="type-badge">{{ . }}</span>
                 {{ end }}
             </td>
-            <td>{{ .BaseExperience }}</td>
+            <td>{{ .Level }}</td>
             <td>{{ .Power }}</td>
         </tr>
     {{ end }}
     </tbody>
 </table>
-
 {{ template "layout_tail" . }}

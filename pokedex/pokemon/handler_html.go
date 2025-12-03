@@ -3,7 +3,7 @@ package pokemon
 import (
 	"net/http"
 	"strconv"
-
+	"strings"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -31,7 +31,7 @@ func listPokemonsHTML(c *gin.Context) {
 		if typeFilter != "" {
 			found := false
 			for _, t := range p.Types {
-				if t == typeFilter {
+				if t == strings.ToLower(typeFilter) {
 					found = true
 					break
 				}
@@ -49,20 +49,15 @@ func listPokemonsHTML(c *gin.Context) {
 		filtered = append(filtered, p)
 	}
 
-	// on peut pré-calculer le power pour l’affichage
-	type PokemonView struct {
-		Pokemon
-		Power int
-	}
-	var views []PokemonView
+	// map -> DTO avec Power
+	var resp []PokemonResponse
 	for _, p := range filtered {
-		power := p.Stats.HP * p.Stats.Attack
-		views = append(views, PokemonView{Pokemon: p, Power: power})
+		resp = append(resp, toResponse(p))
 	}
 
 	c.HTML(http.StatusOK, "pokemons_index.tmpl", gin.H{
 		"title":    "Pokédex",
-		"pokemons": views,
+		"pokemons": resp,
 		"type":     typeFilter,
 		"minLevel": minLevelStr,
 	})
