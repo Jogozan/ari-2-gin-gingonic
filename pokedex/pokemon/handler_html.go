@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -31,7 +32,7 @@ func listPokemonsHTML(c *gin.Context) {
 		if typeFilter != "" {
 			found := false
 			for _, t := range p.Types {
-				if t == strings.ToLower(typeFilter) {
+				if strings.EqualFold(t, typeFilter) {
 					found = true
 					break
 				}
