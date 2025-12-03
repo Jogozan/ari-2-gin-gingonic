@@ -2,13 +2,9 @@ package main
 
 import (
 	"log"
-	"strings"
-	"text/template"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 
 	"pokedex/pokemon"
 )
@@ -19,10 +15,6 @@ func main() {
 		log.Fatalf("Impossible de charger pokemons.json: %v", err)
 	}
 
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		pokemon.RegisterCustomValidations(v)
-	}
-
 	router := gin.Default()
 
 	// Global middlewares (applied to all routes):
@@ -30,11 +22,6 @@ func main() {
 	// - FatigueMiddleware: if a request includes header X-Server-Fatigue=true we add delay
 	router.Use(pokemon.EnrichedLogger())
 	router.Use(pokemon.FatigueMiddleware(500 * time.Millisecond))
-
-	// Fonctions template personnalisées
-	router.SetFuncMap(template.FuncMap{
-		"join": strings.Join,
-	})
 
 	// Templates HTML
 	router.LoadHTMLGlob("templates/*.tmpl")
