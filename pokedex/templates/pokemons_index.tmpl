@@ -5,6 +5,16 @@
     <div style="padding:8px;border-radius:6px;background:#e6ffed;border:1px solid #c6f6d5;margin-bottom:12px;">{{ .message }}</div>
 {{ end }}
 
+<form method="GET" action="/pokemons" style="margin-bottom:15px;">
+    <label>Type:
+        <input type="text" name="type" value="{{ .type }}">
+    </label>
+    <label style="margin-left:10px;">Min HP:
+        <input type="number" name="minLevel" value="{{ .minLevel }}">
+    </label>
+    <button type="submit">Filtrer</button>
+</form>
+
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
     <div>
         Trier: 
@@ -16,6 +26,8 @@
         <a href="/pokemons/stats">Voir statistiques du dresseur</a>
     </div>
 </div>
+
+<a href="/pokemons/new">Nouveau Pokémon</a>
 
 <table>
     <thead>
@@ -52,7 +64,7 @@
                     <button type="submit">Relâcher</button>
                 </form>
             </td>
-            <td>{{ index $.power_map .ID }}</td>
+            <td>{{ .Power }}</td>
         </tr>
     {{ end }}
     </tbody>
