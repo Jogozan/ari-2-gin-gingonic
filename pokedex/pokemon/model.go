@@ -54,6 +54,7 @@ func toResponse(p Pokemon) PokemonResponse {
 	return PokemonResponse{
 		ID:             p.ID,
 		Name:           p.Name,
+		Level:           p.Level,
 		BaseExperience: p.BaseExperience,
 		Weight:         p.Weight,
 		Height:         p.Height,
