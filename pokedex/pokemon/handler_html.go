@@ -3,9 +3,7 @@ package pokemon
 import (
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -23,86 +21,6 @@ func RegisterHTMLRoutes(r *gin.Engine) {
 	r.GET("/pokemons/stats", pokemonsStatsHTML)
 }
 
-// ---- Helpers métier ----
-
-func matchesType(p Pokemon, typeFilter string) bool {
-	if typeFilter == "" {
-		return true
-	}
-	for _, t := range p.Types {
-		if strings.EqualFold(t, typeFilter) {
-			return true
-		}
-	}
-	return false
-}
-
-func matchesMinLevel(p Pokemon, minLevelStr string) bool {
-	if minLevelStr == "" {
-		return true
-	}
-	minLevel, err := strconv.Atoi(minLevelStr)
-	if err != nil {
-		return true // si minLevel est invalide, on ignore le filtre
-	}
-	return p.Stats.HP >= minLevel
-}
-
-func filterPokemons(list []Pokemon, typeFilter, minLevelStr string) []Pokemon {
-	var filtered []Pokemon
-	for _, p := range list {
-		if !matchesType(p, typeFilter) {
-			continue
-		}
-		if !matchesMinLevel(p, minLevelStr) {
-			continue
-		}
-		filtered = append(filtered, p)
-	}
-	return filtered
-}
-
-func pokemonPower(p Pokemon) int {
-	return p.Stats.Attack + p.Stats.Defense + p.Stats.Speed + p.Stats.HP + p.BaseExperience
-}
-
-func sortPokemons(list []Pokemon, sortBy string) []Pokemon {
-	copyList := make([]Pokemon, len(list))
-	copy(copyList, list)
-
-	switch sortBy {
-	case "level":
-		sort.Slice(copyList, func(i, j int) bool {
-			return copyList[i].Level > copyList[j].Level
-		})
-	case "power":
-		sort.Slice(copyList, func(i, j int) bool {
-			return pokemonPower(copyList[i]) > pokemonPower(copyList[j])
-		})
-		// default: pas de tri, on garde l'ordre
-	}
-
-	return copyList
-}
-
-func buildPowerMap(list []Pokemon) map[int]int {
-	powerMap := make(map[int]int, len(list))
-	for _, p := range list {
-		powerMap[p.ID] = pokemonPower(p)
-	}
-	return powerMap
-}
-
-func toResponses(list []Pokemon) []PokemonResponse {
-	resp := make([]PokemonResponse, 0, len(list))
-	for _, p := range list {
-		resp = append(resp, toResponse(p))
-	}
-	return resp
-}
-
-// ---- Handler HTML ----
-
 func listPokemonsHTML(c *gin.Context) {
 	typeFilter := c.Query("type")
 	minLevelStr := c.Query("minLevel")
@@ -113,23 +31,21 @@ func listPokemonsHTML(c *gin.Context) {
 	// 1) Filtrage
 	filtered := filterPokemons(all, typeFilter, minLevelStr)
 
-	// 2) Tri
-	sorted := sortPokemons(filtered, sortBy)
+	// 3) Wrapper dans le DTO
+	resp := toResponses(filtered)
 
-	// 3) Power pré-calculé + DTO
-	powerMap := buildPowerMap(sorted)
-	resp := toResponses(sorted)
+	// 2) Tri
+	pokemons := sortPokemons(resp, sortBy)
 
 	c.HTML(http.StatusOK, "pokemons_index.tmpl", gin.H{
 		"title":       "Pokédex",
-		"pokemons":    resp, // ou `sorted` si le template attend le modèle brut
+		"pokemons":    pokemons, // ou `sorted` si le template attend le modèle brut
 		"type":        typeFilter,
 		"minLevel":    minLevelStr,
 		"sort":        sortBy,
 		"current_url": c.Request.URL.RequestURI(),
 		"message":     c.Query("msg"),
 		"type_colors": typeColorMap(),
-		"power_map":   powerMap,
 	})
 }
 
@@ -262,28 +178,6 @@ func pokemonsStatsHTML(c *gin.Context) {
 	})
 }
 
-// typeColorMap returns a map of type->css color used for badges.
-// Keep the palette small and readable; it's purely presentational for the TP.
-func typeColorMap() map[string]string {
-	return map[string]string{
-		"grass":    "#78C850",
-		"fire":     "#F08030",
-		"water":    "#6890F0",
-		"electric": "#F8D030",
-		"ice":      "#98D8D8",
-		"psychic":  "#F85888",
-		"ghost":    "#705898",
-		"dark":     "#705848",
-		"rock":     "#B8A038",
-		"steel":    "#B8B8D0",
-		"ground":   "#E0C068",
-		"flying":   "#A890F0",
-		"bug":      "#A8B820",
-		"poison":   "#A040A0",
-		"normal":   "#A8A878",
-	}
-}
-
 // Formulaire HTML
 // newPokemonFormHTML renders the empty form used to create a new pokemon.
 // The template expects `title`, `errors` and `input` values in its context.
@@ -306,32 +200,8 @@ func createPokemonHTML(c *gin.Context) {
 
 		if verrs, ok := err.(validator.ValidationErrors); ok {
 			for _, fe := range verrs {
-				var msg string
-				switch fe.Field() {
-				case "Name":
-					msg = "Le nom est obligatoire et max 50 caractères."
-				case "Types":
-					msg = "Merci de fournir 2 types valides maximum."
-				case "Types[0]":
-					msg = "Erreur sur le premier type."
-				case "Types[1]":
-					msg = "Erreur sur le deuxième type."
-				case "BaseExperience":
-					msg = "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000."
-				case "Weight":
-					msg = "Le poids est obligatoire et doit être compris entre 1 et 10000."
-				case "Height":
-					msg = "La taille est obligatoire et doit être comprise entre 1 et 100."
-				case "Stats":
-					msg = "Les statistiques sont obligatoires et doivent être valides."
-				case "Sprites":
-					msg = "Les sprites sont obligatoires et doivent être valides."
-				default:
-					msg = fe.Field() + " invalide."
-				}
-
-				field := fe.Field() // ex: Name, Types, BaseExperience...
-				fieldErrors[field] = append(fieldErrors[field], msg)
+				field := fe.Field()
+				fieldErrors[field] = append(fieldErrors[field], validationMessage(field))
 			}
 		}
 

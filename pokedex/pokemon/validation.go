@@ -1,6 +1,10 @@
 package pokemon
 
-import "github.com/go-playground/validator/v10"
+import (
+	"strings"
+
+	"github.com/go-playground/validator/v10"
+)
 
 // RegisterCustomValidations registers project-specific validation rules
 // into the provided validator instance. Current example registers the
@@ -8,15 +12,16 @@ import "github.com/go-playground/validator/v10"
 func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("pokemon_type", func(fl validator.FieldLevel) bool {
 		allowed := map[string]bool{
-			"Normal": true, "Fire": true, "Water": true,
-			"Grass": true, "Electric": true, "Ice": true,
-			"Fighting": true, "Poison": true, "Ground": true,
-			"Flying": true, "Psychic": true, "Bug": true,
-			"Rock": true, "Ghost": true, "Dragon": true,
-			"Dark": true, "Steel": true,
-			"Fairy": true,
+			"normal": true, "fire": true, "water": true,
+			"grass": true, "electric": true, "ice": true,
+			"fighting": true, "poison": true, "ground": true,
+			"flying": true, "psychic": true, "bug": true,
+			"rock": true, "ghost": true, "dragon": true,
+			"dark": true, "steel": true, "fairy": true,
 		}
+
 		if s, ok := fl.Field().Interface().(string); ok {
+			s = strings.ToLower(strings.TrimSpace(s))
 			return allowed[s]
 		}
 		return false

@@ -38,39 +38,16 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 func getPokemons(c *gin.Context) {
 	typeFilter := c.Query("type")
 	minLevelStr := c.Query("minLevel")
+	sortBy := c.Query("sort")
 
 	all := GetAll()
-	var filtered []Pokemon
 
-	for _, p := range all {
-		if typeFilter != "" {
-			found := false
-			for _, t := range p.Types {
-				if t == typeFilter {
-					found = true
-					break
-				}
-			}
-			if !found {
-				continue
-			}
-		}
-		if minLevelStr != "" {
-			// on utilise ici HP comme proxy de “niveau”
-			minLevel, err := strconv.Atoi(minLevelStr)
-			if err == nil && p.Stats.HP < minLevel {
-				continue
-			}
-		}
-		filtered = append(filtered, p)
-	}
+	// Utilise les helpers métier extraits dans pokemon_service.go
+	filtered := filterPokemons(all, typeFilter, minLevelStr)
+	resp := toResponses(filtered)
+	pokemons := sortPokemons(resp, sortBy)
 
-	// map -> DTO avec Power
-	var resp []PokemonResponse
-	for _, p := range filtered {
-		resp = append(resp, toResponse(p))
-	}
-	RespondOK(c, resp)
+	RespondOK(c, pokemons)
 }
 
 // getPokemonByID handles GET /pokemons/:id and returns a single pokemon.
@@ -105,24 +82,7 @@ func createPokemon(c *gin.Context) {
 		var messages []string
 		if verrs, ok := err.(validator.ValidationErrors); ok {
 			for _, fe := range verrs {
-				switch fe.Field() {
-				case "Name":
-					messages = append(messages, "Le nom est obligatoire et max 50 caractères.")
-				case "Types":
-					messages = append(messages, "Types invalides (ex : Fire, Water, Grass).")
-				case "BaseExperience":
-					messages = append(messages, "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000.")
-				case "Weight":
-					messages = append(messages, "Le poids est obligatoire et doit être compris entre 1 et 10000.")
-				case "Height":
-					messages = append(messages, "La taille est obligatoire et doit être comprise entre 1 et 100.")
-				case "Stats":
-					messages = append(messages, "Les statistiques sont obligatoires et doivent être valides.")
-				case "Sprites":
-					messages = append(messages, "Les sprites sont obligatoires et doivent être valides.")
-				default:
-					messages = append(messages, fe.Field()+" invalide.")
-				}
+				messages = append(messages, validationMessage(fe.Field()))
 			}
 		}
 		RespondError(c, 400, messages)
