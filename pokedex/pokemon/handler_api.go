@@ -32,33 +32,6 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 	admin.POST("/pokemons/:id/level-up", RateLimitMiddleware(5, 10*time.Second), levelUpPokemon)
 }
 
-func levelUpPokemon(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID invalide"})
-		return
-	}
-
-	addLevels := 1
-	if lvlStr := c.Query("levels"); lvlStr != "" {
-		if lv, err := strconv.Atoi(lvlStr); err == nil && lv > 0 {
-			addLevels = lv
-		}
-	}
-
-	p, err := LevelUp(id, addLevels)
-	if err != nil {
-		if errors.Is(err, ErrMaxLevel) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Niveau maximum atteint"})
-			return
-		}
-		c.JSON(http.StatusNotFound, gin.H{"error": "Pokemon non trouvé"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"data": toResponse(p)})
-}
-
 // getPokemons handles GET /pokemons for the API.
 // It supports optional query filters for `type` and `minLevel` and
 // returns a list of PokemonResponse DTOs (including computed Power).
@@ -186,14 +159,12 @@ func deletePokemon(c *gin.Context) {
 // and demonstrates usage of group + route middleware (auth + rate limit)
 // and context propagation from earlier middlewares.
 func levelUpPokemon(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		RespondError(c, http.StatusBadRequest, []string{"ID invalide"})
 		return
 	}
 
-	// For pedagogical purposes we read number of levels to add from query or default 1
 	addLevels := 1
 	if lvlStr := c.Query("levels"); lvlStr != "" {
 		if lv, err := strconv.Atoi(lvlStr); err == nil && lv > 0 {
@@ -201,30 +172,15 @@ func levelUpPokemon(c *gin.Context) {
 		}
 	}
 
-	// retrieve trainer information propagated by earlier middleware
-	trainerVal, _ := c.Get("trainer")
-	trainer, _ := trainerVal.(string)
-
-	// Try to perform level-up
 	p, err := LevelUp(id, addLevels)
 	if err != nil {
+		if errors.Is(err, ErrMaxLevel) {
+			RespondError(c, http.StatusBadRequest, []string{"Niveau maximum atteint"})
+			return
+		}
 		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
 
-	// Demonstrate reading target_pokemon attached earlier by logging middleware
-	if tp, ok := c.Get("target_pokemon"); ok {
-		if tpok, is := tp.(*Pokemon); is {
-			// Use the attached target pokemon just to show how middleware propagation works.
-			// (p may be different copy, we just illustrate available context values)
-			_ = tpok
-		}
-	}
-
-	// Return the updated pokemon and a small message that includes the trainer if present
-	msg := "Pokemon level-up effectué"
-	if trainer != "" {
-		msg = "Pokemon level-up effectué par " + trainer
-	}
-	RespondOK(c, gin.H{"message": msg, "pokemon": p})
+	RespondOK(c, toResponse(p))
 }
