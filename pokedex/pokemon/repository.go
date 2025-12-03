@@ -13,6 +13,9 @@ var (
 	loaded   bool
 )
 
+// LoadFromFile loads the pokemons list from a JSON file located at `path`.
+// It is safe to call multiple times; the file is read only once and stored
+// in an in-memory slice protected by a mutex.
 func LoadFromFile(path string) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -43,12 +46,16 @@ func LoadFromFile(path string) error {
 	return nil
 }
 
+// GetAll returns the in-memory slice of pokemons.
+// The returned slice should be treated as read-only by callers.
 func GetAll() []Pokemon {
 	mu.RLock()
 	defer mu.RUnlock()
 	return pokemons
 }
 
+// GetByID returns a copy of the Pokemon with the given id or an error when not found.
+// A copy is returned to avoid callers accidentally mutating the internal slice state.
 func GetByID(id int) (*Pokemon, error) {
 	mu.RLock()
 	defer mu.RUnlock()
@@ -61,6 +68,8 @@ func GetByID(id int) (*Pokemon, error) {
 	return nil, errors.New("not found")
 }
 
+// Create creates a new Pokemon from the provided input, assigns a new ID
+// and appends it to the in-memory store. It returns the created Pokemon.
 func Create(input CreatePokemonInput) Pokemon {
 	mu.Lock()
 	defer mu.Unlock()
@@ -89,6 +98,8 @@ func Create(input CreatePokemonInput) Pokemon {
 	return p
 }
 
+// Delete removes the Pokemon with the given id from the in-memory store.
+// Returns an error if the pokemon does not exist.
 func Delete(id int) error {
 	mu.Lock()
 	defer mu.Unlock()
@@ -104,6 +115,9 @@ func Delete(id int) error {
 
 var ErrMaxLevel = errors.New("max level reached")
 
+// LevelUp increases the specified Pokemon's level by `levels` and applies
+// a simple side-effect on BaseExperience (10 XP per level). It returns a
+// copy of the updated Pokemon or an error if the id is not found.
 func LevelUp(id int, levels int) (Pokemon, error) {
 	mu.Lock()
 	defer mu.Unlock()
