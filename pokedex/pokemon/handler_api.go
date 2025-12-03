@@ -11,6 +11,9 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// RegisterAPIRoutes registers the HTTP routes for the JSON API.
+// It mounts handlers for listing, reading, creating and deleting pokemons
+// and exposes an admin subgroup which demonstrates middleware usage.
 func RegisterAPIRoutes(rg *gin.RouterGroup) {
 	rg.GET("/pokemons", getPokemons)
 	rg.GET("/pokemons/:id", getPokemonByID)
@@ -27,6 +30,9 @@ func RegisterAPIRoutes(rg *gin.RouterGroup) {
 	admin.POST("/pokemons/:id/level-up", RateLimitMiddleware(5, 10*time.Second), levelUpPokemon)
 }
 
+// getPokemons handles GET /pokemons for the API.
+// It supports optional query filters for `type` and `minLevel` and
+// returns a list of PokemonResponse DTOs (including computed Power).
 func getPokemons(c *gin.Context) {
 	typeFilter := c.Query("type")
 	minLevelStr := c.Query("minLevel")
@@ -65,6 +71,8 @@ func getPokemons(c *gin.Context) {
 	RespondOK(c, resp)
 }
 
+// getPokemonByID handles GET /pokemons/:id and returns a single pokemon.
+// It validates the id parameter, looks up the pokemon and returns 404 when missing.
 func getPokemonByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -80,6 +88,9 @@ func getPokemonByID(c *gin.Context) {
 	RespondOK(c, toResponse(*p))
 }
 
+// createPokemon handles POST /pokemons for the JSON API.
+// It binds and validates the incoming JSON payload, maps validation errors
+// to friendly messages and returns the created resource on success.
 func createPokemon(c *gin.Context) {
 	var input CreatePokemonInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -120,6 +131,8 @@ func createPokemon(c *gin.Context) {
 	RespondCreated(c, p)
 }
 
+// deletePokemon handles DELETE /pokemons/:id.
+// It validates the id parameter and deletes the pokemon if it exists.
 func deletePokemon(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -139,6 +152,10 @@ func deletePokemon(c *gin.Context) {
 // levelUpPokemon allows an authenticated admin to "level up" a Pokemon.
 // This handler demonstrates: auth middleware (group), route middleware (rate limit),
 // context propagation (trainer and target_pokemon) and state change.
+// levelUpPokemon handles POST /admin/pokemons/:id/level-up.
+// This admin-only endpoint increments a pokemon's level by a given amount
+// and demonstrates usage of group + route middleware (auth + rate limit)
+// and context propagation from earlier middlewares.
 func levelUpPokemon(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

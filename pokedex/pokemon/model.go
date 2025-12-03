@@ -52,6 +52,9 @@ type PokemonResponse struct {
 }
 
 func toResponse(p Pokemon) PokemonResponse {
+	// toResponse maps an internal Pokemon model to the API DTO PokemonResponse.
+	// It computes presentation-only fields (like Power) and returns a value
+	// suitable for JSON encoding to clients.
 	power := p.Stats.HP * p.Stats.Attack
 	return PokemonResponse{
 		ID:             p.ID,

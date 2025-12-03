@@ -2,6 +2,9 @@ package pokemon
 
 import "github.com/go-playground/validator/v10"
 
+// RegisterCustomValidations registers project-specific validation rules
+// into the provided validator instance. Current example registers the
+// `pokemon_type` rule used to validate allowed pokemon types.
 func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("pokemon_type", func(fl validator.FieldLevel) bool {
 		allowed := map[string]bool{

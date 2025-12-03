@@ -12,11 +12,14 @@ func RespondOK(c *gin.Context, data interface{}) {
 }
 
 func RespondCreated(c *gin.Context, data interface{}) {
-	//TODO
+	// RespondCreated returns an HTTP 201 with the created resource wrapped
+	// into the standard APIResponse envelope. Use for successful POST creations.
 	c.JSON(201, APIResponse{Data: data})
 }
 
 func RespondError(c *gin.Context, status int, errors []string) {
-	//TODO
+	// RespondError returns an error response using the APIResponse envelope.
+	// `status` allows choosing the HTTP status code (400/404/429/...)
+	// and `errors` is a list of human-friendly error messages.
 	c.JSON(status, APIResponse{Error: errors})
 }

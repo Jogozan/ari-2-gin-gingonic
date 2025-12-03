@@ -5,6 +5,9 @@ import (
 	"testing"
 )
 
+// TestLoadAndLevelUp verifies that creating a pokemon and leveling it up
+// updates Level and BaseExperience as expected. It runs in isolation and
+// cleans up any test state at the end.
 func TestLoadAndLevelUp(t *testing.T) {
 	// Create a pokemon locally (avoids depending on loaded JSON data)
 	input := CreatePokemonInput{
