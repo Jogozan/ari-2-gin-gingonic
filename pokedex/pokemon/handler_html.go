@@ -107,9 +107,11 @@ func createPokemonHTML(c *gin.Context) {
 				case "Name":
 					msg = "Le nom est obligatoire et max 50 caractères."
 				case "Types":
-					msg = "Types invalides (ex : Fire, Water, Grass)."
+					msg = "Merci de fournir 2 types valides maximum."
 				case "Types[0]":
-					msg = "Au moins un type est requis."
+					msg = "Erreur sur le premier type."
+				case "Types[1]":
+					msg = "Erreur sur le deuxième type."
 				case "BaseExperience":
 					msg = "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000."
 				case "Weight":
