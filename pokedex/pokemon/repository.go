@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -65,6 +66,10 @@ func Create(input CreatePokemonInput) Pokemon {
 		}
 	}
 	newID := maxID + 1
+
+	for i := range input.Types {
+		input.Types[i] = strings.ToLower(input.Types[i])
+	}
 
 	p := Pokemon{
 		ID:             newID,
