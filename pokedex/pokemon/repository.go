@@ -83,7 +83,7 @@ func Create(input CreatePokemonInput) Pokemon {
 	}
 	newID := maxID + 1
 
-	for i, _ := range input.Types {
+	for i := range input.Types {
 		input.Types[i] = strings.ToLower(input.Types[i])
 	}
 
