@@ -50,10 +50,11 @@ type PokemonResponse struct {
 }
 
 func toResponse(p Pokemon) PokemonResponse {
-	power := p.Stats.HP * p.Stats.Attack
+	power := p.Stats.HP + p.Stats.Attack + p.Stats.Defense + p.Stats.Speed
 	return PokemonResponse{
 		ID:             p.ID,
 		Name:           p.Name,
+		Level:          p.Level,
 		BaseExperience: p.BaseExperience,
 		Weight:         p.Weight,
 		Height:         p.Height,
