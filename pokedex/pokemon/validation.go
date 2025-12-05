@@ -1,24 +1,51 @@
 package pokemon
 
-import "github.com/go-playground/validator/v10"
+import (
+	"strings"
 
-// RegisterCustomValidations registers project-specific validation rules
-// into the provided validator instance. Current example registers the
-// `pokemon_type` rule used to validate allowed pokemon types.
+	"github.com/go-playground/validator/v10"
+)
+
 func RegisterCustomValidations(v *validator.Validate) {
 	v.RegisterValidation("pokemon_type", func(fl validator.FieldLevel) bool {
 		allowed := map[string]bool{
-			"Normal": true, "Fire": true, "Water": true,
-			"Grass": true, "Electric": true, "Ice": true,
-			"Fighting": true, "Poison": true, "Ground": true,
-			"Flying": true, "Psychic": true, "Bug": true,
-			"Rock": true, "Ghost": true, "Dragon": true,
-			"Dark": true, "Steel": true,
-			"Fairy": true,
+			"normal": true, "fire": true, "water": true,
+			"grass": true, "electric": true, "ice": true,
+			"fighting": true, "poison": true, "ground": true,
+			"flying": true, "psychic": true, "bug": true,
+			"rock": true, "ghost": true, "dragon": true,
+			"dark": true, "steel": true, "fairy": true,
 		}
+
 		if s, ok := fl.Field().Interface().(string); ok {
+			s = strings.ToLower(strings.TrimSpace(s))
 			return allowed[s]
 		}
 		return false
 	})
+}
+
+func validationMessage(field string) string {
+	switch field {
+	case "Name":
+		return "Le nom est obligatoire et max 50 caractères."
+	case "Types":
+		return "Merci de fournir 2 types valides maximum."
+	case "Types[0]":
+		return "Erreur sur le premier type."
+	case "Types[1]":
+		return "Erreur sur le deuxième type."
+	case "BaseExperience":
+		return "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000."
+	case "Weight":
+		return "Le poids est obligatoire et doit être compris entre 1 et 10000."
+	case "Height":
+		return "La taille est obligatoire et doit être comprise entre 1 et 100."
+	case "Stats":
+		return "Les statistiques sont obligatoires et doivent être valides."
+	case "Sprites":
+		return "Les sprites sont obligatoires et doivent être valides."
+	default:
+		return field + " invalide."
+	}
 }

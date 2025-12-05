@@ -109,32 +109,8 @@ func createPokemonHTML(c *gin.Context) {
 
 		if verrs, ok := err.(validator.ValidationErrors); ok {
 			for _, fe := range verrs {
-				var msg string
-				switch fe.Field() {
-				case "Name":
-					msg = "Le nom est obligatoire et max 50 caractères."
-				case "Types":
-					msg = "Merci de fournir 2 types valides maximum."
-				case "Types[0]":
-					msg = "Erreur sur le premier type."
-				case "Types[1]":
-					msg = "Erreur sur le deuxième type."
-				case "BaseExperience":
-					msg = "L'expérience de base est obligatoire et doit être comprise entre 1 et 1000."
-				case "Weight":
-					msg = "Le poids est obligatoire et doit être compris entre 1 et 10000."
-				case "Height":
-					msg = "La taille est obligatoire et doit être comprise entre 1 et 100."
-				case "Stats":
-					msg = "Les statistiques sont obligatoires et doivent être valides."
-				case "Sprites":
-					msg = "Les sprites sont obligatoires et doivent être valides."
-				default:
-					msg = fe.Field() + " invalide."
-				}
-
-				field := fe.Field() // ex: Name, Types, BaseExperience...
-				fieldErrors[field] = append(fieldErrors[field], msg)
+				field := fe.Field()
+				fieldErrors[field] = append(fieldErrors[field], validationMessage(field))
 			}
 		}
 
