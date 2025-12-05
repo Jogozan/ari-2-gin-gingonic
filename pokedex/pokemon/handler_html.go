@@ -1,8 +1,8 @@
 package pokemon
 
 import (
+	"errors"
 	"net/http"
-	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +16,8 @@ func RegisterHTMLRoutes(r *gin.Engine) {
 	r.GET("/pokemons/new", newPokemonFormHTML)
 	r.POST("/pokemons", createPokemonHTML)
 	r.GET("/pokemons/:id", pokemonDetailHTML)
-	r.POST("/pokemons/:id/level-up", pokemonLevelUpHTML)
-	r.POST("/pokemons/:id/release", pokemonReleaseHTML)
+	r.POST("/pokemons/:id/level-up", levelUpPokemonHTML)
+	r.POST("/pokemons/:id/release", releasePokemonHTML)
 	r.GET("/pokemons/stats", pokemonsStatsHTML)
 }
 
@@ -74,90 +74,60 @@ func pokemonDetailHTML(c *gin.Context) {
 	})
 }
 
-// pokemonLevelUpHTML handles simple form POSTs originating from HTML views
+// levelUpPokemonHTML handles simple form POSTs originating from HTML views
 // It performs a LevelUp(+1) and redirects back to the index with a message
-func pokemonLevelUpHTML(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+func levelUpPokemonHTML(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.String(http.StatusBadRequest, "ID invalide")
+		RespondError(c, http.StatusBadRequest, []string{"ID invalide"})
 		return
 	}
 
 	// By default +1 level; optionally caller can provide 'levels' form value
-	levels := 1
-	if lvl := c.PostForm("levels"); lvl != "" {
-		if v, e := strconv.Atoi(lvl); e == nil && v > 0 {
-			levels = v
+	addLevels := 1
+	if lvlStr := c.Query("levels"); lvlStr != "" {
+		if lv, err := strconv.Atoi(lvlStr); err == nil && lv > 0 {
+			addLevels = lv
 		}
 	}
 
-	p, err := LevelUp(id, levels)
+	p, err := LevelUp(id, addLevels)
 	if err != nil {
-		c.String(http.StatusNotFound, "Pokemon non trouvé")
+		if errors.Is(err, ErrMaxLevel) {
+			RespondError(c, http.StatusBadRequest, []string{"Niveau maximum atteint"})
+			return
+		}
+		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
 
-	// choose redirect target in order: explicit form 'redirect', Referer header, default index
-	target := c.PostForm("redirect")
-	if target == "" {
-		target = c.Request.Referer()
-	}
-	if target == "" {
-		target = "/pokemons"
-	}
-
-	// Append message to target URL preserving its existing query parameters
-	msg := p.Name + " a gagné " + strconv.Itoa(levels) + " niveau(s) !"
-	u, err := url.Parse(target)
-	if err != nil {
-		// fallback
-		u = &url.URL{Path: "/pokemons"}
-	}
-	q := u.Query()
-	q.Set("msg", msg)
-	u.RawQuery = q.Encode()
-	c.Redirect(http.StatusSeeOther, u.String())
+	msg := p.Name + " a gagné " + strconv.Itoa(addLevels) + " niveau(x) !"
+	redirectWithMessage(c, msg)
 }
 
-// pokemonReleaseHTML handles releasing (deleting) a pokemon from HTML
+// releasePokemonHTML handles releasing (deleting) a pokemon from HTML
 // and performs a redirect back to the index page.
-func pokemonReleaseHTML(c *gin.Context) {
+func releasePokemonHTML(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		c.String(http.StatusBadRequest, "ID invalide")
+		RespondError(c, http.StatusBadRequest, []string{"ID invalide"})
 		return
 	}
 
 	p, err := GetByID(id)
 	if err != nil {
-		c.String(http.StatusNotFound, "Pokemon non trouvé")
+		RespondError(c, http.StatusNotFound, []string{"Pokemon non trouvé"})
 		return
 	}
 
 	if err := Delete(id); err != nil {
-		c.String(http.StatusInternalServerError, "Impossible de supprimer")
+		RespondError(c, http.StatusInternalServerError, []string{"Impossible de supprimer"})
 		return
 	}
 
-	target := c.PostForm("redirect")
-	if target == "" {
-		target = c.Request.Referer()
-	}
-	if target == "" {
-		target = "/pokemons"
-	}
-
 	msg := p.Name + " a été relâché 😢"
-	u, err := url.Parse(target)
-	if err != nil {
-		u = &url.URL{Path: "/pokemons"}
-	}
-	q := u.Query()
-	q.Set("msg", msg)
-	u.RawQuery = q.Encode()
-	c.Redirect(http.StatusSeeOther, u.String())
+	redirectWithMessage(c, msg)
 }
 
 // pokemonsStatsHTML builds a small aggregation of pokemon counts per type
@@ -172,7 +142,6 @@ func pokemonsStatsHTML(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "pokemons_stats.tmpl", gin.H{
 		"title":       "Statistiques du dresseur",
-		"pokemons":    all,
 		"type_counts": counts,
 		"type_colors": typeColorMap(),
 	})

@@ -1,9 +1,13 @@
 package pokemon
 
 import (
+	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 // ---- Helpers métier ----
@@ -92,4 +96,28 @@ func typeColorMap() map[string]string {
 		"poison":   "#A040A0",
 		"normal":   "#A8A878",
 	}
+}
+
+// redirectWithMessage choisit l'URL de retour et y ajoute le paramètre "msg".
+func redirectWithMessage(c *gin.Context, msg string) {
+	// 1) Choisir la cible : paramètre "redirect" > Referer > défaut
+	target := c.PostForm("redirect")
+	if target == "" {
+		target = c.Request.Referer()
+	}
+	if target == "" {
+		target = "/pokemons"
+	}
+
+	// 2) Ajouter le message dans la query string
+	u, err := url.Parse(target)
+	if err != nil {
+		u = &url.URL{Path: "/pokemons"}
+	}
+	q := u.Query()
+	q.Set("msg", msg)
+	u.RawQuery = q.Encode()
+
+	// 3) Redirection
+	c.Redirect(http.StatusSeeOther, u.String())
 }
